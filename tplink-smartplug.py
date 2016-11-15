@@ -19,6 +19,8 @@
 # limitations under the License.
 #
 #
+from __future__ import print_function
+
 import socket
 import argparse
 
@@ -51,19 +53,19 @@ commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
 # XOR Autokey Cipher with starting key = 171
 def encrypt(string):
 	key = 171
-	result = "\0\0\0\0"
+	result = bytearray(4)
 	for i in string:
 		a = key ^ ord(i)
 		key = a
-		result += chr(a)
+		result += bytearray([a])
 	return result
 
 def decrypt(string):
 	key = 171
 	result = ""
-	for i in string:
-		a = key ^ ord(i)
-		key = ord(i)
+	for i in bytearray(string):
+		a = key ^ i
+		key = i
 		result += chr(a)
 	return result
 
@@ -93,7 +95,7 @@ try:
 	data = sock_tcp.recv(2048)
 	sock_tcp.close()
 
-	print "Sent:     ", cmd
-	print "Received: ", decrypt(data[4:])
+	print("Sent:     ", cmd)
+	print("Received: ", decrypt(data[4:]))
 except socket.error:
 	quit("Could not connect to host " + ip + ":" + str(port))

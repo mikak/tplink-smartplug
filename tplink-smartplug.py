@@ -69,33 +69,37 @@ def decrypt(string):
 		result += chr(a)
 	return result
 
+
+# Send command and receive reply
+def send_command(cmd, ip, port=9999):
+    try:
+        sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock_tcp.connect((ip, port))
+        sock_tcp.send(encrypt(cmd))
+        data = sock_tcp.recv(2048)
+        sock_tcp.close()
+
+        print("Sent:     ", cmd)
+        return decrypt(data[4:])
+    except socket.error:
+        print("Could not connect to host " + ip + ":" + str(port))
+        return None
+
+
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
 parser.add_argument("-t", "--target", metavar="<ip>", required=True, help="Target IP Address", type=validIP)
 group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands) 
+group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
 group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
 args = parser.parse_args()
 
 # Set target IP, port and command to send
 ip = args.target
-port = 9999
 if args.command is None:
 	cmd = args.json
 else:
 	cmd = commands[args.command]
 
-
-
-# Send command and receive reply
-try:
-	sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock_tcp.connect((ip, port))
-	sock_tcp.send(encrypt(cmd))
-	data = sock_tcp.recv(2048)
-	sock_tcp.close()
-
-	print("Sent:     ", cmd)
-	print("Received: ", decrypt(data[4:]))
-except socket.error:
-	quit("Could not connect to host " + ip + ":" + str(port))
+resp = send_command(cmd, ip)
+print("Received: ", resp)

@@ -22,7 +22,6 @@
 from __future__ import print_function
 
 import socket
-import argparse
 
 version = 0.1
 
@@ -85,21 +84,23 @@ def send_command(cmd, ip, port=9999):
         print("Could not connect to host " + ip + ":" + str(port))
         return None
 
+if __name__ == "__main__":
+    import argparse
 
-# Parse commandline arguments
-parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
-parser.add_argument("-t", "--target", metavar="<ip>", required=True, help="Target IP Address", type=validIP)
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
-group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
-args = parser.parse_args()
+    # Parse commandline arguments
+    parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
+    parser.add_argument("-t", "--target", metavar="<ip>", required=True, help="Target IP Address", type=validIP)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
+    group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
+    args = parser.parse_args()
 
-# Set target IP, port and command to send
-ip = args.target
-if args.command is None:
-	cmd = args.json
-else:
-	cmd = commands[args.command]
+    # Set target IP, port and command to send
+    ip = args.target
+    if args.command is None:
+        cmd = args.json
+    else:
+        cmd = commands[args.command]
 
-resp = send_command(cmd, ip)
-print("Received: ", resp)
+    resp = send_command(cmd, ip)
+    print("Received: ", resp)
